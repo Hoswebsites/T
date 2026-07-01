@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>دار العلوم أدوات - Hostools</title>
+    <title>دار العلوم أدوات - HOS Tools</title>
     <link class="icon" type="image/png" href="https://i.postimg.cc/85pZCMDz/logo.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -253,7 +253,7 @@
                     <i class="fa-solid fa-bars text-sm"></i>
                 </button>
 
-                <img src="https://i.postimg.cc/85pZCMDz/logo.png" alt="Hostools" class="w-8 h-8 rounded-lg object-cover flex-shrink-0 border border-white/10">
+                <img src="https://i.postimg.cc/85pZCMDz/logo.png" alt="HOS Tools" class="w-8 h-8 rounded-lg object-cover flex-shrink-0 border border-white/10">
 
                 <button id="modeSelectorTrigger" class="flex items-center gap-1.5 cursor-pointer text-xs font-bold text-white bg-white/5 border border-white/10 hover:bg-white/10 py-2 px-4 rounded-full transition active:scale-95">
                     <i id="currentModeIcon" class="fa-regular fa-comment-dots text-[11px]"></i>
@@ -271,7 +271,7 @@
         <div id="appSidebar" class="fixed inset-y-0 right-0 w-[280px] bg-[#0d0d0f] z-[60] transform translate-x-full transition-transform duration-300 border-l border-white/5 flex flex-col">
             <div class="p-4 border-b border-white/5">
                 <div class="flex items-center gap-2 mb-3">
-                    <img src="https://i.postimg.cc/85pZCMDz/logo.png" alt="Hostools" class="w-8 h-8 rounded-lg object-cover border border-white/10">
+                    <img src="https://i.postimg.cc/85pZCMDz/logo.png" alt="HOS Tools" class="w-8 h-8 rounded-lg object-cover border border-white/10">
                     <span class="text-white font-extrabold text-sm">دار العلوم أدوات</span>
                 </div>
                 <button id="sidebarNewChatBtn" onclick="location.reload()" class="w-full bg-white text-black hover:bg-gray-200 rounded-xl py-3 text-sm font-bold flex items-center justify-center gap-2 transition active:scale-95 shadow-lg">
@@ -319,9 +319,9 @@
 
         <main id="workspaceArea" class="p-4 no-scrollbar">
             <div id="welcomeSection" class="flex flex-col items-center justify-center text-center py-16 px-4 space-y-4">
-                <img src="https://i.postimg.cc/85pZCMDz/logo.png" alt="Hostools" class="w-16 h-16 rounded-2xl object-cover border border-white/10 shadow-lg">
+                <img src="https://i.postimg.cc/85pZCMDz/logo.png" alt="HOS Tools" class="w-16 h-16 rounded-2xl object-cover border border-white/10 shadow-lg">
                 <h2 class="text-lg font-extrabold text-white">دار العلوم أدوات</h2>
-                <p class="text-xs text-gray-500 max-w-[280px] leading-relaxed font-medium">مرحباً بك في <span class="text-white font-bold">Hostools</span>، منصتك المتكاملة التي تجمع أحدث أدوات الذكاء الاصطناعي والحلول البرمجية في مكان واحد</p>
+                <p class="text-xs text-gray-500 max-w-[280px] leading-relaxed font-medium">مرحباً بك في <span class="text-white font-bold">HOS Tools</span>، منصتك المتكاملة التي تجمع أحدث أدوات الذكاء الاصطناعي والحلول البرمجية في مكان واحد</p>
                 <p class="text-xs text-gray-500 max-w-[280px] leading-relaxed font-medium">النموذج النشط: <span id="welcomeModelDisplay" class="text-white font-bold">Mercury 2</span></p>
             </div>
 
@@ -842,7 +842,7 @@
             modal.classList.add('active');
         };
         window.closeMediaViewer = function() { document.getElementById('mediaViewerModal').classList.remove('active'); document.getElementById('mediaViewerVideo').pause(); };
-        window.downloadCurrentMedia = function() { if (currentDownloadUrl) { const a = document.createElement('a'); a.href = currentDownloadUrl; a.download = `Hostools_${Date.now()}`; document.body.appendChild(a); a.click(); document.body.removeChild(a); } };
+        window.downloadCurrentMedia = function() { if (currentDownloadUrl) { const a = document.createElement('a'); a.href = currentDownloadUrl; a.download = `HOS Tools_${Date.now()}`; document.body.appendChild(a); a.click(); document.body.removeChild(a); } };
 
         // ==================== دالة تأمين النصوص ضد XSS ====================
         function escapeHtml(text) {
@@ -971,15 +971,25 @@
             }
 
             // إرسال الطلب الفعلي للـ Vercel Backend Serverless Endpoint
+            console.log(`Sending request to ${endpoint}...`, requestBody);
+            
+            // تم إضافة timeout لضمان عدم تعليق الواجهة في الطلبات الطويلة
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 ثانية كحد أقصى
+
             fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify(requestBody),
+                signal: controller.signal
             })
             .then(response => {
-                if (!response.ok) throw new Error('Network error');
+                clearTimeout(timeoutId);
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error || 'Network error'); });
+                }
                 return response.json();
             })
             .then(data => {
@@ -1051,10 +1061,13 @@
                 console.error("API Error:", error);
                 const loaderElem = document.getElementById(loaderId);
                 if (loaderElem) {
+                    let errorMessage = "عذراً، لم نتمكن من الاتصال بالخادم الرئيسي لمعالجة طلبك حالياً. يرجى المحاولة مرة أخرى.";
+                    if (error.name === 'AbortError') errorMessage = "استغرق الطلب وقتاً طويلاً جداً، يرجى المحاولة مرة أخرى بكلمات أبسط.";
+                    
                     loaderElem.innerHTML = `
                     <div class="bg-zinc-900 border border-red-500/30 p-4 rounded-2xl rounded-tl-none text-sm max-w-[90%] w-full space-y-2 font-medium shadow-md">
                         <div class="text-[11px] text-red-400 mb-2 flex items-center gap-1 font-bold"><i class="fa-solid fa-circle-exclamation"></i> خطأ في الاتصال</div>
-                        <p class="text-xs text-gray-400">عذراً، لم نتمكن من الاتصال بالخادم الرئيسي لمعالجة طلبك حالياً. يرجى التأكد من تشغيل الباك اند أو مراجعة إعدادات الـ API على خوادم Vercel.</p>
+                        <p class="text-xs text-gray-400">${errorMessage}</p>
                     </div>`;
                 }
             });
