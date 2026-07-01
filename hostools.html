@@ -813,7 +813,19 @@
         // Input Logic
         promptInput.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; validateSendButton(); });
 
-        function validateSendButton() { const hT = promptInput.value.trim().length > 0; const hM = currentMode === 'chat' && chatAttachedImages.length > 0; if (hT || hM) { sendBtn.classList.remove('opacity-40', 'pointer-events-none'); sendBtn.classList.add('bg-white', 'text-black'); } else { sendBtn.classList.add('opacity-40', 'pointer-events-none'); sendBtn.classList.remove('bg-white', 'text-black'); } }
+        function validateSendButton() { 
+            const hasText = promptInput.value.trim().length > 0; 
+            const hasChatImages = currentMode === 'chat' && chatAttachedImages.length > 0; 
+            const hasGenImages = currentMode !== 'chat' && (currentImages[0] || currentImages[1]);
+            
+            if (hasText || hasChatImages || hasGenImages) { 
+                sendBtn.classList.remove('opacity-40', 'pointer-events-none'); 
+                sendBtn.classList.add('bg-white', 'text-black'); 
+            } else { 
+                sendBtn.classList.add('opacity-40', 'pointer-events-none'); 
+                sendBtn.classList.remove('bg-white', 'text-black'); 
+            } 
+        }
         function getAspectString(ratio) { if (ratio === "1:1") return "1/1"; if (ratio === "16:9") return "16/9"; if (ratio === "9:16") return "9/16"; if (ratio === "4:3") return "4/3"; return "16/9"; }
 
         // Media Viewer Logic
@@ -852,8 +864,9 @@
             if (!currentChatId) {
                 currentChatId = Date.now();
                 let titleText = text ? text.substring(0, 25) + (text.length > 25 ? '...' : '') : "محادثة وسائط جديدة";
-                chatHistoryData.unshift({ id: currentChatId, title: titleText, pinned: false, locked: false, pin: null });
-                renderChatHistory();
+                // تم إيقاف إضافة التاريخ للشريط الجانبي بناءً على طلبك بحذف التخزين المحلي
+                // chatHistoryData.unshift({ id: currentChatId, title: titleText, pinned: false, locked: false, pin: null });
+                // renderChatHistory();
             }
 
             welcomeSection.classList.add('hidden');
@@ -893,6 +906,9 @@
             const base64GenImages = [currentImages[0], currentImages[1]].filter(Boolean);
 
             if (currentMode === 'chat') { chatAttachedImages = []; renderChatPreviews(); }
+            // تصفير الصور المرجعية في أوضاع التوليد بعد الإرسال
+            if (currentMode !== 'chat') { currentImages = {}; updateGenUI(); }
+            
             validateSendButton();
             document.getElementById('workspaceArea').scrollTop = document.getElementById('workspaceArea').scrollHeight;
 

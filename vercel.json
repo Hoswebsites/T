@@ -9,8 +9,12 @@
       "dest": "/api/index.js"
     },
     {
-      "src": "/(.*)",
+      "src": "/hostools",
       "dest": "/hostools.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
