@@ -42,7 +42,7 @@ const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || "";
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || "";
 
 // Base URLs
-const POLLINATIONS_BASE_URL = "https://gen.pollinations.ai";
+const POLLINATIONS_BASE_URL = "https://image.pollinations.ai";
 const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
 
 // ==================== TEXT GENERATION (OpenAI Compatible) ====================
@@ -128,7 +128,7 @@ app.post('/api/video', async (req, res) => {
         else if (model === "seedance-pro") targetModel = "seedance-pro";
         else if (model === "wan-pro") targetModel = "wan-pro";
 
-        let videoUrl = `${POLLINATIONS_BASE_URL}/video/${encodeURIComponent(prompt)}?model=${targetModel}&duration=${duration}&size=${size}&key=${POLLINATIONS_API_KEY}`;
+        let videoUrl = `https://video.pollinations.ai/video/${encodeURIComponent(prompt)}?model=${targetModel}&duration=${duration}&size=${size}&key=${POLLINATIONS_API_KEY}`;
         
         if (extended) videoUrl += `&extended=true`;
         if (images && images.length > 0) {

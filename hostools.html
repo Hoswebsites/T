@@ -992,27 +992,29 @@
                         
                         successHtml += `<p class="leading-relaxed text-gray-200 break-words">${responseText}</p>`;
                     } else if (currentMode === 'image') {
-                        // التحقق من مصفوفة الصور أو الحقول الراجعة
                         let imagesArray = data.images || data.urls || (data.imageUrl ? [data.imageUrl] : (data.url ? [data.url] : []));
                         
                         if (imagesArray.length > 0) {
                             let gridClass = imagesArray.length > 1 ? 'grid grid-cols-2 gap-2' : 'flex flex-col gap-2';
                             successHtml += `<div class="${gridClass} w-full">`;
                             imagesArray.forEach((imgUrl) => {
-                                successHtml += `<img src="${imgUrl}" onclick="openMediaViewer('${imgUrl}', 'image')" class="w-full rounded-xl cursor-pointer hover:opacity-80 transition object-cover border border-white/10 shadow-sm" style="aspect-ratio: ${getAspectString(currentRatio)};">`;
+                                successHtml += `<img src="${imgUrl}" onerror="this.src='https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?model=flux&width=1024&height=1024&seed=${Date.now()}'" onclick="openMediaViewer('${imgUrl}', 'image')" class="w-full rounded-xl cursor-pointer hover:opacity-80 transition object-cover border border-white/10 shadow-sm" style="aspect-ratio: ${getAspectString(currentRatio)};">`;
                             });
                             successHtml += `</div><p class="text-[10px] text-gray-500 text-center mt-2">انقر على الصورة للتكبير والتحميل</p>`;
                         } else {
-                            successHtml += `<div class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-center text-red-400 text-xs font-bold">عذراً، فشل توليد الصورة. يرجى المحاولة مرة أخرى.</div>`;
+                            // استخدام رابط مباشر كـ Fallback آمن في حال فشل الباك اند
+                            let fallbackImg = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?model=flux&width=1024&height=1024&seed=${Date.now()}`;
+                            successHtml += `<div class="w-full"><img src="${fallbackImg}" onclick="openMediaViewer('${fallbackImg}', 'image')" class="w-full rounded-xl cursor-pointer hover:opacity-80 transition object-cover border border-white/10 shadow-sm" style="aspect-ratio: ${getAspectString(currentRatio)};"></div><p class="text-[10px] text-gray-500 text-center mt-2">تم التوليد عبر المحرك الاحتياطي</p>`;
                         }
 
                     } else if (currentMode === 'video') {
                         let videoUrl = data.videoUrl || data.url;
                         if (videoUrl) {
-                            let mockVideoPoster = data.poster || `https://gen.pollinations.ai/prompt/${encodeURIComponent(text)}?model=nanobanana-pro&width=800&height=450&seed=${Date.now()}`;
+                            // استخدام image.pollinations.ai بدلاً من gen.pollinations.ai لضمان وجود الـ Poster
+                            let mockVideoPoster = data.poster || `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?model=flux&width=800&height=450&seed=${Date.now()}`;
                             successHtml += `
                             <div class="relative w-full rounded-xl overflow-hidden cursor-pointer group border border-white/10 shadow-sm" onclick="openMediaViewer('${videoUrl}', 'video')">
-                                <img src="${mockVideoPoster}" class="w-full object-cover transition duration-300 group-hover:scale-105" style="aspect-ratio: ${getAspectString(currentRatio)};">
+                                <img src="${mockVideoPoster}" onerror="this.src='https://image.pollinations.ai/prompt/video%20preview?width=800&height=450'" class="w-full object-cover transition duration-300 group-hover:scale-105" style="aspect-ratio: ${getAspectString(currentRatio)};">
                                 <div class="absolute inset-0 bg-black/40 flex items-center justify-center transition">
                                     <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 group-hover:bg-white/40 group-hover:scale-110 transition duration-300">
                                         <i class="fa-solid fa-play text-xl text-white ml-1"></i>
