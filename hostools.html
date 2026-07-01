@@ -973,20 +973,15 @@
             // إرسال الطلب الفعلي للـ Vercel Backend Serverless Endpoint
             console.log(`Sending request to ${endpoint}...`, requestBody);
             
-            // تم إضافة timeout لضمان عدم تعليق الواجهة في الطلبات الطويلة
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 ثانية كحد أقصى
-
+            // تم إلغاء الـ timeout لانتظار الرد مهما استغرق الوقت بناءً على طلب المستخدم
             fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(requestBody),
-                signal: controller.signal
+                body: JSON.stringify(requestBody)
             })
             .then(response => {
-                clearTimeout(timeoutId);
                 if (!response.ok) {
                     return response.json().then(err => { throw new Error(err.error || 'Network error'); });
                 }

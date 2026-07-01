@@ -102,8 +102,8 @@ app.post('/api/image', async (req, res) => {
         let imageUrl = `${POLLINATIONS_BASE_URL}/image/${encodeURIComponent(prompt)}?model=${targetModel}&width=${width}&height=${height}&n=${count}&key=${POLLINATIONS_API_KEY}`;
         
         // التحقق من أن الصورة تم توليدها فعلياً قبل إرجاع الرابط
-        // هذا سيجعل الباك اند ينتظر حتى تنتهي عملية التوليد
-        await axios.get(imageUrl, { timeout: 30000 });
+        // تم إلغاء الـ timeout لانتظار الرد مهما استغرق الوقت
+        await axios.get(imageUrl);
         
         res.json({ success: true, imageUrl: imageUrl, images: [imageUrl], url: imageUrl });
     } catch (error) {
@@ -135,8 +135,8 @@ app.post('/api/video', async (req, res) => {
         }
 
         // انتظار توليد الفيديو فعلياً قبل إرجاع الرابط
-        // الفيديو قد يستغرق وقتاً طويلاً، لذا نضع timeout كافٍ
-        await axios.get(videoUrl, { timeout: 60000 });
+        // تم إلغاء الـ timeout لانتظار الرد مهما استغرق الوقت
+        await axios.get(videoUrl);
 
         res.json({ success: true, videoUrl: videoUrl, url: videoUrl });
     } catch (error) {
