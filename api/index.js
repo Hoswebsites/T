@@ -88,14 +88,11 @@ app.post('/api/image', async (req, res) => {
     try {
         const { prompt, model = "nanobanana-pro", size = "1:1", count = 1, images = [] } = req.body;
         
-        // التحقق من صحة الإدخال
         if (!prompt || typeof prompt !== 'string') {
             return res.status(400).json({ error: 'Invalid prompt' });
         }
         
-        // Map frontend model names (slugs) to Pollinations API model names
         let targetModel = "nanobanana-pro";
-        
         if (model === "nanobanana-pro") targetModel = "nanobanana-pro";
         else if (model === "ideogram-v4-quality") targetModel = "ideogram-v4-quality";
         else if (model === "nanobanana-2") targetModel = "nanobanana-2";
@@ -103,6 +100,10 @@ app.post('/api/image', async (req, res) => {
 
         const [width, height] = parseSize(size);
         let imageUrl = `${POLLINATIONS_BASE_URL}/image/${encodeURIComponent(prompt)}?model=${targetModel}&width=${width}&height=${height}&n=${count}&key=${POLLINATIONS_API_KEY}`;
+        
+        // التحقق من أن الصورة تم توليدها فعلياً قبل إرجاع الرابط
+        // هذا سيجعل الباك اند ينتظر حتى تنتهي عملية التوليد
+        await axios.get(imageUrl, { timeout: 30000 });
         
         res.json({ success: true, imageUrl: imageUrl, images: [imageUrl], url: imageUrl });
     } catch (error) {
@@ -116,14 +117,11 @@ app.post('/api/video', async (req, res) => {
     try {
         const { prompt, model = "ltx-2", duration = 5, size = "16:9", extended = false, images = [] } = req.body;
 
-        // التحقق من صحة الإدخال
         if (!prompt || typeof prompt !== 'string') {
             return res.status(400).json({ error: 'Invalid prompt' });
         }
 
-        // Map frontend model names (slugs) to Pollinations API model names
         let targetModel = "ltx-2";
-        
         if (model === "ltx-2") targetModel = "ltx-2";
         else if (model === "seedance-pro") targetModel = "seedance-pro";
         else if (model === "wan-pro") targetModel = "wan-pro";
@@ -132,10 +130,13 @@ app.post('/api/video', async (req, res) => {
         
         if (extended) videoUrl += `&extended=true`;
         if (images && images.length > 0) {
-            // Pollinations API usually expects direct URLs for images, we pass them if they are URLs
             if (images[0] && images[0].startsWith('http')) videoUrl += `&start_image=${encodeURIComponent(images[0])}`;
             if (images[1] && images[1].startsWith('http')) videoUrl += `&end_image=${encodeURIComponent(images[1])}`;
         }
+
+        // انتظار توليد الفيديو فعلياً قبل إرجاع الرابط
+        // الفيديو قد يستغرق وقتاً طويلاً، لذا نضع timeout كافٍ
+        await axios.get(videoUrl, { timeout: 60000 });
 
         res.json({ success: true, videoUrl: videoUrl, url: videoUrl });
     } catch (error) {
