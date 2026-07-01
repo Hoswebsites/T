@@ -42,7 +42,7 @@ const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || "";
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || "";
 
 // Base URLs
-const POLLINATIONS_BASE_URL = "https://image.pollinations.ai";
+const POLLINATIONS_BASE_URL = "https://gen.pollinations.ai";
 const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
 
 // ==================== TEXT GENERATION (OpenAI Compatible) ====================
@@ -58,7 +58,7 @@ app.post('/api/chat', async (req, res) => {
         // Map frontend model names (slugs) to Pollinations/API model names
         let targetModel = "openai-large"; // Default to mercury backend
         
-        if (model === "mercury") targetModel = "openai-large";
+        if (model === "mercury") targetModel = "mercury";
         else if (model === "claude-large") targetModel = "claude-large";
         else if (model === "openai-large") targetModel = "openai-large";
         else if (model === "kimi-code") targetModel = "kimi-code";
@@ -104,7 +104,7 @@ app.post('/api/image', async (req, res) => {
         const [width, height] = parseSize(size);
         let imageUrl = `${POLLINATIONS_BASE_URL}/image/${encodeURIComponent(prompt)}?model=${targetModel}&width=${width}&height=${height}&n=${count}&key=${POLLINATIONS_API_KEY}`;
         
-        res.json({ success: true, imageUrl: imageUrl });
+        res.json({ success: true, imageUrl: imageUrl, images: [imageUrl], url: imageUrl });
     } catch (error) {
         console.error('Image Generation Error:', error.message);
         res.status(500).json({ error: 'Failed to generate image' });
@@ -128,15 +128,16 @@ app.post('/api/video', async (req, res) => {
         else if (model === "seedance-pro") targetModel = "seedance-pro";
         else if (model === "wan-pro") targetModel = "wan-pro";
 
-        let videoUrl = `https://video.pollinations.ai/video/${encodeURIComponent(prompt)}?model=${targetModel}&duration=${duration}&size=${size}&key=${POLLINATIONS_API_KEY}`;
+        let videoUrl = `${POLLINATIONS_BASE_URL}/video/${encodeURIComponent(prompt)}?model=${targetModel}&duration=${duration}&size=${size}&key=${POLLINATIONS_API_KEY}`;
         
         if (extended) videoUrl += `&extended=true`;
         if (images && images.length > 0) {
-            if (images[0]) videoUrl += `&start_image=${encodeURIComponent(images[0])}`;
-            if (images[1]) videoUrl += `&end_image=${encodeURIComponent(images[1])}`;
+            // Pollinations API usually expects direct URLs for images, we pass them if they are URLs
+            if (images[0] && images[0].startsWith('http')) videoUrl += `&start_image=${encodeURIComponent(images[0])}`;
+            if (images[1] && images[1].startsWith('http')) videoUrl += `&end_image=${encodeURIComponent(images[1])}`;
         }
 
-        res.json({ success: true, videoUrl: videoUrl });
+        res.json({ success: true, videoUrl: videoUrl, url: videoUrl });
     } catch (error) {
         console.error('Video Generation Error:', error.message);
         res.status(500).json({ error: 'Failed to generate video' });
